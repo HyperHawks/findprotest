@@ -9,7 +9,8 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, setSupabaseToken } from "@/integrations/supabase/client";
+import { mintSupabaseToken } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -46,8 +47,12 @@ function AuthPage() {
       const user = cred.user;
       
       const token = await user.getIdToken();
-      const { setSupabaseToken } = await import("@/integrations/supabase/client");
-      setSupabaseToken(token);
+      const { success, token: supaToken } = await mintSupabaseToken({ data: { firebaseToken: token } });
+      if (success && supaToken) {
+        setSupabaseToken(supaToken);
+      } else {
+        setSupabaseToken(token);
+      }
 
       const { error } = await supabase.from("profiles").upsert({
         id: user.uid,
@@ -85,8 +90,12 @@ function AuthPage() {
         // Wait, for custom JWTs, we must manually create the profile row since there's no trigger.
         // We set the token so the client is authenticated for the insert.
         const token = await user.getIdToken();
-        const { setSupabaseToken } = await import("@/integrations/supabase/client");
-        setSupabaseToken(token);
+        const { success, token: supaToken } = await mintSupabaseToken({ data: { firebaseToken: token } });
+        if (success && supaToken) {
+          setSupabaseToken(supaToken);
+        } else {
+          setSupabaseToken(token);
+        }
         
         await supabase.from("profiles").upsert({
           id: user.uid,

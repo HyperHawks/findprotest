@@ -1,23 +1,32 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, type User as FirebaseUser } from "firebase/auth";
+import { onAuthStateChanged, type User } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { supabase, setSupabaseToken } from "@/integrations/supabase/client";
+import { mintSupabaseToken } from "@/lib/auth";
 
 export function useAuth() {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
   const [isLeader, setIsLeader] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setUser(firebaseUser);
-      if (firebaseUser) {
-        // Get the JWT token and give it to Supabase
-        const token = await firebaseUser.getIdToken();
-        setSupabaseToken(token);
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (u) {
+        const token = await u.getIdToken();
+        const { success, token: supaToken } = await mintSupabaseToken({ data: { firebaseToken: token } });
+        if (success && supaToken) {
+          setSupabaseToken(supaToken);
+        } else {
+          setSupabaseToken(token);
+        }
         
-        // Also check if they are a leader
-        checkLeader(firebaseUser.uid);
+        const { data } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", u.uid)
+          .maybeSingle();
+        setIsLeader(data?.role === "leader");
       } else {
         setSupabaseToken(null);
         setIsLeader(false);
@@ -28,14 +37,5 @@ export function useAuth() {
     return () => unsubscribe();
   }, []);
 
-  async function checkLeader(userId: string) {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .in("role", ["leader", "admin"]);
-    setIsLeader((data ?? []).length > 0);
-  }
-
-  return { user, isLoading, isLeader };
+  return { user, isLeader, isLoading };
 }
