@@ -5,10 +5,22 @@ import { X } from "lucide-react"; // Import for closing modal
 
 import { SiteHeader } from "@/components/site-header";
 import { fetchNews } from "@/lib/queries";
+import { useAuth } from "@/hooks/use-auth";
 import { CAUSE_TAGS } from "@/lib/protest-colors";
 import { ingestGoogleNews } from "@/lib/news";
 import { useState, useEffect } from "react";
 import { COUNTRIES } from "@/lib/countries";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from "@tanstack/react-router";
 
 const search = z.object({ country: z.string().optional(), state: z.string().optional(), city: z.string().optional(), cause: z.string().optional(), topic: z.string().optional() });
 
@@ -37,16 +49,29 @@ function NewsPage() {
   const [countryInput, setCountryInput] = useState(s.country && s.country !== "undefined" ? s.country : "");
   
   
+  const navigate = useNavigate();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
   // State for redirect confirmation modal
   const [confirmUrl, setConfirmUrl] = useState<string | null>(null);
 
+  const { user } = useAuth();
+
   async function handleSync() {
+    if (!user) {
+      setShowAuthPrompt(true);
+      return;
+    }
     setSyncing(true);
     try {
-      await ingestGoogleNews({ data: { city: s.city, state: s.state, country: s.country, topic: s.topic } });
+      const res = await ingestGoogleNews({ data: { city: s.city, state: s.state, country: s.country, topic: s.topic } });
+      if (res && !res.success) {
+        alert("Sync Failed: " + res.message);
+      }
       await q.refetch();
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert("Error: " + e.message);
     } finally {
       setSyncing(false);
     }
@@ -213,6 +238,28 @@ function NewsPage() {
           </div>
         </div>
       )}
+
+      <AlertDialog open={showAuthPrompt} onOpenChange={setShowAuthPrompt}>
+        <AlertDialogContent className="border-4 border-black brutal-shadow rounded-none bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-mono font-black text-2xl uppercase border-b-4 border-black pb-2 text-black">Sign in required</AlertDialogTitle>
+            <AlertDialogDescription className="font-mono text-lg font-bold text-black mt-4">
+              You must identify yourself before triggering global news synchronization.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 flex gap-4 sm:space-x-0">
+            <AlertDialogCancel className="flex-1 font-mono font-black uppercase text-xl py-6 border-4 border-black bg-white hover:bg-black hover:text-white transition-colors rounded-none mt-0">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => navigate({ to: "/auth" })}
+              className="flex-1 font-mono font-black uppercase text-xl py-6 border-4 border-black bg-primary hover:-translate-y-1 hover:-translate-x-1 hover:brutal-shadow transition-all rounded-none text-black hover:text-black"
+            >
+              Sign In
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
