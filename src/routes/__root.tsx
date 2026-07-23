@@ -81,16 +81,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "Track civic mobilizations worldwide in real time. Color-coded intensity map, verified news, community posts, and tools for organizers.",
+          "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements.",
       },
       { property: "og:title", content: "Vanguard — Live Global Protest Index" },
       {
         property: "og:description",
         content:
-          "Real-time global index of protests. Interactive intensity map, news, and community-verified reports.",
+          "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Vanguard — Live Global Protest Index" },
+      { name: "twitter:description", content: "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b39da7ce-dbcc-4a4c-9400-3a3912ac6a46/id-preview-3ec64bbd--6591da68-36b9-40ab-a02b-0688c576be95.lovable.app-1784787657153.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b39da7ce-dbcc-4a4c-9400-3a3912ac6a46/id-preview-3ec64bbd--6591da68-36b9-40ab-a02b-0688c576be95.lovable.app-1784787657153.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

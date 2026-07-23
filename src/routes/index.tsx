@@ -11,7 +11,7 @@ export const Route = createFileRoute("/")({
       { title: "Vanguard — Live Global Protest Index" },
       { name: "description", content: "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements." },
       { property: "og:title", content: "Vanguard — Live Global Protest Index" },
-      { property: "og:description", content: "Real-time color-coded map of protests worldwide." },
+      { property: "og:description", content: "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements." },
     ],
   }),
   component: Home,
