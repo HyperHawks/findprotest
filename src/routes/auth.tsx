@@ -51,8 +51,8 @@ function AuthPage() {
       if (res.success && res.token) {
         setSupabaseToken(res.token);
       } else {
-        console.error("CRITICAL: Failed to mint token on server!", res.message);
-        setSupabaseToken(token);
+        console.error("Failed to mint token on server:", res.message);
+        setSupabaseToken(null);
       }
 
       const { error } = await supabase.from("profiles").upsert({
@@ -95,8 +95,8 @@ function AuthPage() {
         if (res.success && res.token) {
           setSupabaseToken(res.token);
         } else {
-          console.error("CRITICAL: Failed to mint token on server!", res.message);
-          setSupabaseToken(token);
+          console.error("Failed to mint token on server:", res.message);
+          setSupabaseToken(null);
         }
         
         await supabase.from("profiles").upsert({

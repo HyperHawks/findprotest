@@ -7,11 +7,11 @@ export const mintSupabaseToken = createServerFn({ method: "POST" })
   .validator((data: { firebaseToken: string }) => data)
   .handler(async ({ data }) => {
     try {
-      const projectId = process.env.VITE_FIREBASE_PROJECT_ID;
-      if (!projectId) throw new Error("VITE_FIREBASE_PROJECT_ID is not set");
+      const projectId = process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID;
+      if (!projectId) throw new Error("FIREBASE_PROJECT_ID is not set");
       
-      const jwtSecret = process.env.VITE_SUPABASE_JWT_SECRET;
-      if (!jwtSecret) throw new Error("VITE_SUPABASE_JWT_SECRET is not set");
+      const jwtSecret = process.env.SUPABASE_JWT_SECRET || process.env.VITE_SUPABASE_JWT_SECRET;
+      if (!jwtSecret) throw new Error("SUPABASE_JWT_SECRET is not set");
 
       // Verify the Firebase Token
       const jwks = createRemoteJWKSet(new URL(JWKS_URL));
