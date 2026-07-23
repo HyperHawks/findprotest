@@ -111,7 +111,7 @@ function ProtestDetail() {
               dangerouslySetInnerHTML={{ __html: p.description_html || "<p><em>No description provided.</em></p>" }}
             />
             <div className="mt-6 flex flex-wrap gap-2">
-              {(p.cause_tags ?? []).map((t) => (
+              {(p.cause_tags ?? []).map((t: string) => (
                 <span key={t} className="text-[10px] font-mono font-extrabold border-2 border-border px-2 py-1 uppercase bg-primary">
                   #{t}
                 </span>
