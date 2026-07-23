@@ -14,16 +14,416 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          leader_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          leader_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          leader_id?: string
+        }
+        Relationships: []
+      }
+      leader_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          provider: string | null
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      news_articles: {
+        Row: {
+          cause_tags: string[]
+          country_code: string | null
+          created_at: string
+          external_id: string | null
+          id: string
+          image_url: string | null
+          protest_id: string | null
+          published_at: string
+          source: string
+          summary: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          cause_tags?: string[]
+          country_code?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          image_url?: string | null
+          protest_id?: string | null
+          published_at?: string
+          source: string
+          summary?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          cause_tags?: string[]
+          country_code?: string | null
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          image_url?: string | null
+          protest_id?: string | null
+          published_at?: string
+          source?: string
+          summary?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_articles_protest_id_fkey"
+            columns: ["protest_id"]
+            isOneToOne: false
+            referencedRelation: "protests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          read_at: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          read_at?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      post_reactions: {
+        Row: {
+          created_at: string
+          post_id: string
+          reaction: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          reaction?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          reaction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          body_html: string
+          created_at: string
+          id: string
+          media_urls: string[]
+          protest_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body_html?: string
+          created_at?: string
+          id?: string
+          media_urls?: string[]
+          protest_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body_html?: string
+          created_at?: string
+          id?: string
+          media_urls?: string[]
+          protest_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_protest_id_fkey"
+            columns: ["protest_id"]
+            isOneToOne: false
+            referencedRelation: "protests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          country_code: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          country_code?: string | null
+          created_at?: string
+          display_name: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          country_code?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      protest_attendees: {
+        Row: {
+          created_at: string
+          protest_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          protest_id: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          protest_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "protest_attendees_protest_id_fkey"
+            columns: ["protest_id"]
+            isOneToOne: false
+            referencedRelation: "protests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      protests: {
+        Row: {
+          cause_tags: string[]
+          city: string | null
+          country_code: string
+          cover_image_url: string | null
+          created_at: string
+          description_html: string
+          end_at: string | null
+          id: string
+          intensity: number
+          lat: number | null
+          leader_id: string
+          lng: number | null
+          location_name: string | null
+          region: string | null
+          start_at: string
+          status: Database["public"]["Enums"]["protest_status"]
+          title: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          cause_tags?: string[]
+          city?: string | null
+          country_code: string
+          cover_image_url?: string | null
+          created_at?: string
+          description_html?: string
+          end_at?: string | null
+          id?: string
+          intensity?: number
+          lat?: number | null
+          leader_id: string
+          lng?: number | null
+          location_name?: string | null
+          region?: string | null
+          start_at: string
+          status?: Database["public"]["Enums"]["protest_status"]
+          title: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          cause_tags?: string[]
+          city?: string | null
+          country_code?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description_html?: string
+          end_at?: string | null
+          id?: string
+          intensity?: number
+          lat?: number | null
+          leader_id?: string
+          lng?: number | null
+          location_name?: string | null
+          region?: string | null
+          start_at?: string
+          status?: Database["public"]["Enums"]["protest_status"]
+          title?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      country_stats: {
+        Row: {
+          active_count: number | null
+          avg_intensity: number | null
+          color_bucket: number | null
+          country_code: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "follower" | "leader" | "admin"
+      attendance_status: "interested" | "going"
+      protest_status: "upcoming" | "active" | "ended" | "cancelled"
+      subscription_status:
+        | "inactive"
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +550,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["follower", "leader", "admin"],
+      attendance_status: ["interested", "going"],
+      protest_status: ["upcoming", "active", "ended", "cancelled"],
+      subscription_status: [
+        "inactive",
+        "trialing",
+        "active",
+        "past_due",
+        "cancelled",
+      ],
+    },
   },
 } as const
