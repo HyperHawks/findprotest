@@ -14,10 +14,11 @@ export function useAuth() {
       setUser(u);
       if (u) {
         const token = await u.getIdToken();
-        const { success, token: supaToken } = await mintSupabaseToken({ data: { firebaseToken: token } });
-        if (success && supaToken) {
-          setSupabaseToken(supaToken);
+        const res = await mintSupabaseToken({ data: { firebaseToken: token } });
+        if (res.success && res.token) {
+          setSupabaseToken(res.token);
         } else {
+          console.error("CRITICAL: Failed to mint Supabase token on server!", res.message);
           setSupabaseToken(token);
         }
         

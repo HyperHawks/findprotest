@@ -47,10 +47,11 @@ function AuthPage() {
       const user = cred.user;
       
       const token = await user.getIdToken();
-      const { success, token: supaToken } = await mintSupabaseToken({ data: { firebaseToken: token } });
-      if (success && supaToken) {
-        setSupabaseToken(supaToken);
+      const res = await mintSupabaseToken({ data: { firebaseToken: token } });
+      if (res.success && res.token) {
+        setSupabaseToken(res.token);
       } else {
+        console.error("CRITICAL: Failed to mint token on server!", res.message);
         setSupabaseToken(token);
       }
 
@@ -90,10 +91,11 @@ function AuthPage() {
         // Wait, for custom JWTs, we must manually create the profile row since there's no trigger.
         // We set the token so the client is authenticated for the insert.
         const token = await user.getIdToken();
-        const { success, token: supaToken } = await mintSupabaseToken({ data: { firebaseToken: token } });
-        if (success && supaToken) {
-          setSupabaseToken(supaToken);
+        const res = await mintSupabaseToken({ data: { firebaseToken: token } });
+        if (res.success && res.token) {
+          setSupabaseToken(res.token);
         } else {
+          console.error("CRITICAL: Failed to mint token on server!", res.message);
           setSupabaseToken(token);
         }
         
