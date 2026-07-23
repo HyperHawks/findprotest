@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { zodValidator } from "@tanstack/zod-adapter";
+
 import { SiteHeader } from "@/components/site-header";
 import { WorldChoropleth, IntensityLegend } from "@/components/world-choropleth";
 import { fetchCountryStats, fetchProtests } from "@/lib/queries";
@@ -9,7 +9,7 @@ import { fetchCountryStats, fetchProtests } from "@/lib/queries";
 const search = z.object({ country: z.string().length(2).optional() });
 
 export const Route = createFileRoute("/map")({
-  validateSearch: zodValidator(search),
+  validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
       { title: "Global Map — Vanguard" },

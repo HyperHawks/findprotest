@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { zodValidator } from "@tanstack/zod-adapter";
+
 import { SiteHeader } from "@/components/site-header";
 import { fetchNews } from "@/lib/queries";
 import { CAUSE_TAGS } from "@/lib/protest-colors";
@@ -9,7 +9,7 @@ import { CAUSE_TAGS } from "@/lib/protest-colors";
 const search = z.object({ country: z.string().optional(), cause: z.string().optional() });
 
 export const Route = createFileRoute("/news")({
-  validateSearch: zodValidator(search),
+  validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
       { title: "Protest News — Vanguard" },
