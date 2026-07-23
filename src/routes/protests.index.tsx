@@ -13,7 +13,7 @@ const search = z.object({
   minIntensity: z.coerce.number().min(1).max(5).optional(),
 });
 
-export const Route = createFileRoute("/protests")({
+export const Route = createFileRoute("/protests/")({
   validateSearch: zodValidator(search),
   head: () => ({
     meta: [

@@ -9,38 +9,181 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as MapRouteImport } from './routes/map'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProtestsIndexRouteImport } from './routes/protests.index'
+import { Route as ProtestsIdRouteImport } from './routes/protests.$id'
+import { Route as PostsNewRouteImport } from './routes/posts.new'
 
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtestsIndexRoute = ProtestsIndexRouteImport.update({
+  id: '/protests/',
+  path: '/protests/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProtestsIdRoute = ProtestsIdRouteImport.update({
+  id: '/protests/$id',
+  path: '/protests/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsNewRoute = PostsNewRouteImport.update({
+  id: '/posts/new',
+  path: '/posts/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/feed': typeof FeedRoute
+  '/map': typeof MapRoute
+  '/news': typeof NewsRoute
+  '/pricing': typeof PricingRoute
+  '/posts/new': typeof PostsNewRoute
+  '/protests/$id': typeof ProtestsIdRoute
+  '/protests/': typeof ProtestsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/feed': typeof FeedRoute
+  '/map': typeof MapRoute
+  '/news': typeof NewsRoute
+  '/pricing': typeof PricingRoute
+  '/posts/new': typeof PostsNewRoute
+  '/protests/$id': typeof ProtestsIdRoute
+  '/protests': typeof ProtestsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/feed': typeof FeedRoute
+  '/map': typeof MapRoute
+  '/news': typeof NewsRoute
+  '/pricing': typeof PricingRoute
+  '/posts/new': typeof PostsNewRoute
+  '/protests/$id': typeof ProtestsIdRoute
+  '/protests/': typeof ProtestsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/feed'
+    | '/map'
+    | '/news'
+    | '/pricing'
+    | '/posts/new'
+    | '/protests/$id'
+    | '/protests/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/feed'
+    | '/map'
+    | '/news'
+    | '/pricing'
+    | '/posts/new'
+    | '/protests/$id'
+    | '/protests'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/feed'
+    | '/map'
+    | '/news'
+    | '/pricing'
+    | '/posts/new'
+    | '/protests/$id'
+    | '/protests/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  FeedRoute: typeof FeedRoute
+  MapRoute: typeof MapRoute
+  NewsRoute: typeof NewsRoute
+  PricingRoute: typeof PricingRoute
+  PostsNewRoute: typeof PostsNewRoute
+  ProtestsIdRoute: typeof ProtestsIdRoute
+  ProtestsIndexRoute: typeof ProtestsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +191,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/protests/': {
+      id: '/protests/'
+      path: '/protests'
+      fullPath: '/protests/'
+      preLoaderRoute: typeof ProtestsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/protests/$id': {
+      id: '/protests/$id'
+      path: '/protests/$id'
+      fullPath: '/protests/$id'
+      preLoaderRoute: typeof ProtestsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/new': {
+      id: '/posts/new'
+      path: '/posts/new'
+      fullPath: '/posts/new'
+      preLoaderRoute: typeof PostsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  FeedRoute: FeedRoute,
+  MapRoute: MapRoute,
+  NewsRoute: NewsRoute,
+  PricingRoute: PricingRoute,
+  PostsNewRoute: PostsNewRoute,
+  ProtestsIdRoute: ProtestsIdRoute,
+  ProtestsIndexRoute: ProtestsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
