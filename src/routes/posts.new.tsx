@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/posts/new")({
   head: () => ({
-    meta: [{ title: "New Post — Vanguard" }, { name: "description", content: "Share an update with the community." }],
+    meta: [{ title: "New Post — FINDPROTEST" }, { name: "description", content: "Share an update with the community." }],
   }),
   component: NewPost,
 });

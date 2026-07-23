@@ -15,6 +15,7 @@ import { Route as FeedRouteImport } from './routes/feed'
 import { Route as MapRouteImport } from './routes/map'
 import { Route as NewsRouteImport } from './routes/news'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PartiesIndexRouteImport } from './routes/parties.index'
 import { Route as PartiesIdRouteImport } from './routes/parties.$id'
 import { Route as PartiesNewRouteImport } from './routes/parties.new'
@@ -50,6 +51,11 @@ const NewsRoute = NewsRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartiesIndexRoute = PartiesIndexRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/map': typeof MapRoute
   '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
+  '/profile': typeof ProfileRoute
   '/parties/$id': typeof PartiesIdRoute
   '/parties/new': typeof PartiesNewRoute
   '/posts/new': typeof PostsNewRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/map': typeof MapRoute
   '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
+  '/profile': typeof ProfileRoute
   '/parties/$id': typeof PartiesIdRoute
   '/parties/new': typeof PartiesNewRoute
   '/posts/new': typeof PostsNewRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/map': typeof MapRoute
   '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
+  '/profile': typeof ProfileRoute
   '/parties/$id': typeof PartiesIdRoute
   '/parties/new': typeof PartiesNewRoute
   '/posts/new': typeof PostsNewRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/news'
     | '/pricing'
+    | '/profile'
     | '/parties/$id'
     | '/parties/new'
     | '/posts/new'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/news'
     | '/pricing'
+    | '/profile'
     | '/parties/$id'
     | '/parties/new'
     | '/posts/new'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/map'
     | '/news'
     | '/pricing'
+    | '/profile'
     | '/parties/$id'
     | '/parties/new'
     | '/posts/new'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   MapRoute: typeof MapRoute
   NewsRoute: typeof NewsRoute
   PricingRoute: typeof PricingRoute
+  ProfileRoute: typeof ProfileRoute
   PartiesIdRoute: typeof PartiesIdRoute
   PartiesNewRoute: typeof PartiesNewRoute
   PostsNewRoute: typeof PostsNewRoute
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parties/': {
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   MapRoute: MapRoute,
   NewsRoute: NewsRoute,
   PricingRoute: PricingRoute,
+  ProfileRoute: ProfileRoute,
   PartiesIdRoute: PartiesIdRoute,
   PartiesNewRoute: PartiesNewRoute,
   PostsNewRoute: PostsNewRoute,

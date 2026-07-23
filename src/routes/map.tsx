@@ -16,9 +16,9 @@ export const Route = createFileRoute("/map")({
   validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
-      { title: "Global Map — Vanguard" },
+      { title: "Global Map — FINDPROTEST" },
       { name: "description", content: "Interactive world protest choropleth. Click any country to drill in." },
-      { property: "og:title", content: "Global Map — Vanguard" },
+      { property: "og:title", content: "Global Map — FINDPROTEST" },
       { property: "og:description", content: "Interactive world protest choropleth." },
     ],
   }),

@@ -15,8 +15,8 @@ export const Route = createFileRoute("/protests/$id")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.title ?? "Protest"} — Vanguard` },
-      { name: "description", content: loaderData?.title ?? "Protest details on Vanguard" },
+      { title: `${loaderData?.title ?? "Protest"} — FINDPROTEST` },
+      { name: "description", content: loaderData?.title ?? "Protest details on FINDPROTEST" },
       { property: "og:title", content: loaderData?.title ?? "Protest" },
       { property: "og:description", content: `${loaderData?.city ?? ""} · Intensity ${loaderData?.intensity}/5` },
     ],

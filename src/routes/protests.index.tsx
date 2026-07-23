@@ -23,9 +23,9 @@ export const Route = createFileRoute("/protests/")({
   validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
-      { title: "Protests — Vanguard" },
+      { title: "Protests — FINDPROTEST" },
       { name: "description", content: "Browse and filter protests worldwide by country, cause, status, and intensity." },
-      { property: "og:title", content: "Protests — Vanguard" },
+      { property: "og:title", content: "Protests — FINDPROTEST" },
       { property: "og:description", content: "Browse and filter protests worldwide." },
     ],
   }),

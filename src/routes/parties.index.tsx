@@ -20,9 +20,9 @@ export const Route = createFileRoute("/parties/")({
   validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
-      { title: "Political Parties — Vanguard" },
-      { name: "description", content: "Browse and support political parties on Vanguard." },
-      { property: "og:title", content: "Political Parties — Vanguard" },
+      { title: "Political Parties — FINDPROTEST" },
+      { name: "description", content: "Browse and support political parties on FINDPROTEST." },
+      { property: "og:title", content: "Political Parties — FINDPROTEST" },
       { property: "og:description", content: "Browse and support political parties." },
     ],
   }),

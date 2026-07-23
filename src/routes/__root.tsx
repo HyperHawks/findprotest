@@ -77,13 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Vanguard — Live Global Protest Index" },
+      { title: "FINDPROTEST — Live Global Protest Index" },
       {
         name: "description",
         content:
           "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements.",
       },
-      { property: "og:title", content: "Vanguard — Live Global Protest Index" },
+      { property: "og:title", content: "FINDPROTEST — Live Global Protest Index" },
       {
         property: "og:description",
         content:
@@ -91,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Vanguard — Live Global Protest Index" },
+      { name: "twitter:title", content: "FINDPROTEST — Live Global Protest Index" },
       { name: "twitter:description", content: "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b39da7ce-dbcc-4a4c-9400-3a3912ac6a46/id-preview-3ec64bbd--6591da68-36b9-40ab-a02b-0688c576be95.lovable.app-1784787657153.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b39da7ce-dbcc-4a4c-9400-3a3912ac6a46/id-preview-3ec64bbd--6591da68-36b9-40ab-a02b-0688c576be95.lovable.app-1784787657153.png" },

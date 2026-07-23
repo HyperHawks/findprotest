@@ -21,7 +21,7 @@ export function SiteHeader() {
       <div className="w-full bg-primary border-b-2 border-border py-2 px-4 overflow-hidden whitespace-nowrap">
         <div className="inline-flex gap-10 items-center text-[11px] font-mono font-extrabold uppercase tracking-tighter">
           <span className="flex items-center gap-2">
-            <span className="size-2 bg-foreground animate-pulse" /> LIVE // GLOBAL PROTEST INDEX
+            <span className="size-2 bg-foreground animate-pulse" /> FINDPROTEST // GLOBAL PROTEST INDEX
           </span>
           <span>// USER-CONTRIBUTED + VERIFIED NEWS</span>
           <span>// COLOR = INTENSITY</span>
@@ -34,7 +34,7 @@ export function SiteHeader() {
             to="/"
             className="text-xl md:text-2xl font-black tracking-tighter uppercase italic bg-foreground text-background px-3 py-1"
           >
-            Vanguard
+            FINDPROTEST
           </Link>
           {/* Desktop nav */}
           <div className="hidden md:flex gap-6 text-[11px] font-mono font-extrabold uppercase">
@@ -58,6 +58,12 @@ export function SiteHeader() {
                 className="hidden sm:inline-block px-4 py-2 text-[10px] font-mono font-extrabold border-2 border-border bg-tertiary uppercase tracking-tighter hover:brutal-shadow-sm"
               >
                 New Post
+              </Link>
+              <Link
+                to="/profile"
+                className="px-4 py-2 text-[10px] font-mono font-extrabold border-2 border-border bg-background uppercase tracking-tighter hover:bg-primary transition-colors"
+              >
+                Profile
               </Link>
               <button
                 type="button"
@@ -105,13 +111,22 @@ export function SiteHeader() {
             </Link>
           ))}
           {user && (
-            <Link
-              to="/posts/new"
-              onClick={() => setMobileOpen(false)}
-              className="block px-4 py-3 text-[11px] font-mono font-extrabold uppercase border-2 border-border bg-tertiary"
-            >
-              + New Post
-            </Link>
+            <>
+              <Link
+                to="/profile"
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-3 text-[11px] font-mono font-extrabold uppercase border-2 border-border bg-background hover:bg-primary transition-colors"
+              >
+                Profile
+              </Link>
+              <Link
+                to="/posts/new"
+                onClick={() => setMobileOpen(false)}
+                className="block px-4 py-3 text-[11px] font-mono font-extrabold uppercase border-2 border-border bg-tertiary"
+              >
+                + New Post
+              </Link>
+            </>
           )}
         </div>
       )}

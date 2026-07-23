@@ -39,7 +39,10 @@ export async function fetchProtests(filters: ProtestFilters = {}): Promise<Prote
   if (rest.cause) q = q.contains("cause_tags", [rest.cause]);
   if (rest.minIntensity) q = q.gte("intensity", rest.minIntensity);
   const { data, error } = await q;
-  if (error) throw error;
+  if (error) {
+    console.error("fetchProtests ERROR:", error);
+    throw error;
+  }
   return data ?? [];
 }
 
@@ -68,14 +71,20 @@ export async function fetchProtest(id: string): Promise<Protest | null> {
 
 export async function fetchCountryStats(): Promise<CountryStat[]> {
   const { data, error } = await supabase.from("country_stats").select("*");
-  if (error) throw error;
+  if (error) {
+    console.error("fetchCountryStats ERROR:", error);
+    throw error;
+  }
   return (data as unknown as CountryStat[]) ?? [];
 }
 
-export async function fetchNews(filters: { country?: string; cause?: string } = {}): Promise<NewsArticle[]> {
+export async function fetchNews(filters: { country?: string; state?: string; city?: string; cause?: string; topic?: string } = {}): Promise<NewsArticle[]> {
   let q = supabase.from("news_articles").select("*").order("published_at", { ascending: false }).limit(50);
   if (filters.country) q = q.eq("country_code", filters.country.toUpperCase());
+  if (filters.state) q = q.ilike("state", `%${filters.state}%`);
+  if (filters.city) q = q.ilike("city", `%${filters.city}%`);
   if (filters.cause) q = q.contains("cause_tags", [filters.cause]);
+  if (filters.topic) q = q.ilike("title", `%${filters.topic}%`);
   const { data, error } = await q;
   if (error) throw error;
   return data ?? [];
@@ -133,6 +142,11 @@ export async function fetchPostsPaginated(page = 1, pageSize = 10, sortBy: "newe
     data: posts.map((p) => ({ ...p, profiles: profileMap.get(p.author_id) ?? null })) as PostWithProfile[],
     total: count ?? 0,
   };
+}
+
+export async function deletePost(postId: string) {
+  const { error } = await supabase.from("posts").delete().eq("id", postId);
+  if (error) throw error;
 }
 
 export async function fetchAttendeeCount(protestId: string): Promise<number> {

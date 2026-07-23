@@ -12,8 +12,8 @@ import { useAuth } from "@/hooks/use-auth";
 export const Route = createFileRoute("/parties/new")({
   head: () => ({
     meta: [
-      { title: "Create Party — Vanguard" },
-      { name: "description", content: "Create a new political party on Vanguard." },
+      { title: "Create Party — FINDPROTEST" },
+      { name: "description", content: "Create a new political party on FINDPROTEST." },
     ],
   }),
   component: NewParty,

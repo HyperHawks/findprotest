@@ -16,8 +16,8 @@ export const Route = createFileRoute("/parties/$id")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.name ?? "Party"} — Vanguard` },
-      { name: "description", content: loaderData?.name ?? "Political party on Vanguard" },
+      { title: `${loaderData?.name ?? "Party"} — FINDPROTEST` },
+      { name: "description", content: loaderData?.name ?? "Political party on FINDPROTEST" },
     ],
   }),
   notFoundComponent: () => (

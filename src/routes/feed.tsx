@@ -4,9 +4,20 @@ import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
 import { PaginationControls } from "@/components/pagination-controls";
 import { CommentSection } from "@/components/comment-section";
-import { fetchPostsPaginated, togglePostPin, toggleUserPin, fetchUserPins } from "@/lib/queries";
+import { fetchPostsPaginated, togglePostPin, toggleUserPin, fetchUserPins, deletePost } from "@/lib/queries";
 import { useAuth } from "@/hooks/use-auth";
 import type { User } from "firebase/auth";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const search = z.object({
   page: z.coerce.number().min(1).optional(),
@@ -17,9 +28,9 @@ export const Route = createFileRoute("/feed")({
   validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
-      { title: "Community Feed — Vanguard" },
+      { title: "Community Feed — FINDPROTEST" },
       { name: "description", content: "Latest updates from organizers and observers around the world." },
-      { property: "og:title", content: "Community Feed — Vanguard" },
+      { property: "og:title", content: "Community Feed — FINDPROTEST" },
       { property: "og:description", content: "Latest updates from organizers worldwide." },
     ],
   }),
@@ -56,6 +67,11 @@ function FeedPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["user-pins", "post"] }),
   });
 
+  const deletePostMutation = useMutation({
+    mutationFn: (postId: string) => deletePost(postId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["posts"] }),
+  });
+
   const setSearch = (patch: Record<string, unknown>) => navigate({ search: { ...s, ...patch } });
 
   return (
@@ -85,6 +101,11 @@ function FeedPage() {
           {(q.data?.data ?? []).map((p) => {
             const isPinned = p.is_pinned;
             const isBookmarked = userPins.data?.has(p.id) ?? false;
+            
+            // Allow deletion only by author within 24 hours
+            const isAuthor = user && user.uid === p.author_id;
+            const postAgeMs = Date.now() - new Date(p.created_at).getTime();
+            const isDeletable = isAuthor && postAgeMs < 24 * 60 * 60 * 1000;
 
             return (
               <article
@@ -114,8 +135,38 @@ function FeedPage() {
                         </div>
                       </div>
                     </div>
-                    {/* Actions */}
                     <div className="flex items-center gap-1">
+                      {isDeletable && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              type="button"
+                              disabled={deletePostMutation.isPending}
+                              className="px-2 py-1 border-2 border-border text-[10px] font-mono font-extrabold bg-danger text-background disabled:opacity-50 hover:opacity-90"
+                              title="Delete post (available for 24h)"
+                            >
+                              🗑️ DELETE
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="border-2 border-border brutal-shadow rounded-none sm:rounded-none">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="font-black uppercase text-xl">Delete Post</AlertDialogTitle>
+                              <AlertDialogDescription className="font-mono text-sm text-muted-foreground">
+                                Are you sure you want to permanently delete this post? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="border-2 border-border rounded-none font-mono text-xs font-bold uppercase">Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deletePostMutation.mutate(p.id)}
+                                className="border-2 border-border rounded-none font-mono text-xs font-bold uppercase bg-danger text-background hover:bg-danger/90"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                       {user && (
                         <button
                           type="button"

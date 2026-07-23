@@ -8,9 +8,9 @@ import { fetchCountryStats, fetchProtests } from "@/lib/queries";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Vanguard — Live Global Protest Index" },
+      { title: "FINDPROTEST — Live Global Protest Index" },
       { name: "description", content: "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements." },
-      { property: "og:title", content: "Vanguard — Live Global Protest Index" },
+      { property: "og:title", content: "FINDPROTEST — Live Global Protest Index" },
       { property: "og:description", content: "Real-time color-coded map of protests worldwide. Track intensity, read verified news, join movements." },
     ],
   }),
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   const stats = useQuery({ queryKey: ["country-stats"], queryFn: fetchCountryStats });
   const protests = useQuery({ queryKey: ["protests", "top"], queryFn: () => fetchProtests() });
+  const recentProtests = useQuery({ queryKey: ["protests", "recent"], queryFn: () => fetchProtests({ sortBy: "start_at", sortDir: "desc", pageSize: 6 }) });
 
   const totalActive = (stats.data ?? []).reduce((n, s) => n + Number(s.active_count), 0);
 
@@ -38,7 +39,7 @@ function Home() {
                 Every<br />movement,<br />on one map.
               </h1>
               <p className="text-sm font-medium text-muted-foreground max-w-sm mb-8">
-                Vanguard tracks protests worldwide in real time. Filter by country, cause, and intensity. Read
+                FINDPROTEST tracks protests worldwide in real time. Filter by country, cause, and intensity. Read
                 verified news. Join or lead a movement.
               </p>
               <div className="flex flex-wrap gap-3">
@@ -96,6 +97,46 @@ function Home() {
             {!protests.isLoading && (protests.data ?? []).length === 0 && (
               <div className="col-span-full border-2 border-dashed border-border p-8 text-center text-sm font-mono uppercase">
                 No protests yet. <Link to="/pricing" className="underline">Become a leader</Link> to create one.
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Recent protests */}
+        <section className="p-8 lg:p-12 border-b-2 border-border bg-muted/30">
+          <div className="flex items-end justify-between mb-6">
+            <h2 className="text-3xl font-black uppercase tracking-tighter">Recent Protests</h2>
+            <Link to="/protests" className="text-[11px] font-mono font-extrabold uppercase underline">See all →</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(recentProtests.data ?? []).slice(0, 6).map((p) => (
+              <Link
+                key={p.id}
+                to="/protests/$id"
+                params={{ id: p.id }}
+                className="border-2 border-border bg-card p-5 brutal-shadow hover:-translate-y-1 hover:-translate-x-1 transition-transform"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <div
+                    className="px-2 py-1 border-2 border-border text-[10px] font-mono font-extrabold uppercase"
+                    style={{ background: `var(--protest-${p.intensity})` }}
+                  >
+                    Intensity {p.intensity}/5
+                  </div>
+                  <span className="text-[10px] font-mono font-extrabold uppercase">{p.country_code}</span>
+                </div>
+                <h3 className="font-black text-lg uppercase leading-tight mb-2">{p.title}</h3>
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {p.city ?? ""}{p.city && p.region ? " · " : ""}{p.region ?? ""}
+                </p>
+                <p className="text-[10px] font-mono uppercase mt-4 text-muted-foreground">
+                  Started: {new Date(p.start_at).toLocaleDateString()}
+                </p>
+              </Link>
+            ))}
+            {!recentProtests.isLoading && (recentProtests.data ?? []).length === 0 && (
+              <div className="col-span-full border-2 border-dashed border-border p-8 text-center text-sm font-mono uppercase">
+                No recent protests found.
               </div>
             )}
           </div>

@@ -1,26 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/site-header";
+import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/pricing")({
   head: () => ({
     meta: [
-      { title: "Leader Plans — Vanguard" },
+      { title: "Leader Plans — FINDPROTEST" },
       { name: "description", content: "Become a Leader to create protests and mobilize your community." },
-      { property: "og:title", content: "Leader Plans — Vanguard" },
-      { property: "og:description", content: "Become a Leader on Vanguard." },
+      { property: "og:title", content: "Leader Plans — FINDPROTEST" },
+      { property: "og:description", content: "Become a Leader on FINDPROTEST." },
     ],
   }),
   component: Pricing,
 });
 
 function Pricing() {
+  const { user, isLeader } = useAuth();
+  
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
       <main className="max-w-5xl mx-auto p-6 lg:p-10">
         <h1 className="text-5xl font-black uppercase tracking-tighter mb-2">Pick your role</h1>
         <p className="text-sm font-mono uppercase text-muted-foreground mb-10">
-          Follow the movement free · Lead it for $29/mo
+          Follow the movement free · Lead it for free
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card
@@ -38,16 +42,34 @@ function Pricing() {
           />
           <Card
             name="Leader"
-            price="$29/mo"
+            price="Free"
             bg="bg-primary"
             cta={
               <button
                 type="button"
-                disabled
-                className="block w-full text-center py-3 border-2 border-border bg-foreground text-background font-mono text-[11px] font-extrabold uppercase opacity-60 cursor-not-allowed"
-                title="Payments launch coming soon"
+                onClick={async () => {
+                  if (!user) {
+                    window.location.href = "/auth";
+                    return;
+                  }
+                  if (isLeader) {
+                    alert("You are already a leader!");
+                    return;
+                  }
+                  const { error } = await supabase.from("user_roles").insert({
+                    user_id: user.uid,
+                    role: "leader"
+                  });
+                  if (error) {
+                    alert(error.message);
+                  } else {
+                    alert("Upgraded to Leader successfully! Refresh the page.");
+                    window.location.reload();
+                  }
+                }}
+                className="block w-full text-center py-3 border-2 border-border bg-foreground text-background font-mono text-[11px] font-extrabold uppercase hover:opacity-90"
               >
-                Coming soon — join waitlist
+                {isLeader ? "Already a Leader" : "Upgrade to Leader"}
               </button>
             }
             features={[
