@@ -1,9 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
-import { fetchPosts } from "@/lib/queries";
+import { PaginationControls } from "@/components/pagination-controls";
+import { CommentSection } from "@/components/comment-section";
+import { fetchPostsPaginated, togglePostPin, toggleUserPin, fetchUserPins } from "@/lib/queries";
+import { useAuth } from "@/hooks/use-auth";
+import type { User } from "firebase/auth";
+
+const search = z.object({
+  page: z.coerce.number().min(1).optional(),
+  sort: z.enum(["newest", "oldest"]).optional(),
+});
 
 export const Route = createFileRoute("/feed")({
+  validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
       { title: "Community Feed — Vanguard" },
@@ -16,46 +27,148 @@ export const Route = createFileRoute("/feed")({
 });
 
 function FeedPage() {
-  const q = useQuery({ queryKey: ["posts"], queryFn: fetchPosts });
+  const s = Route.useSearch();
+  const navigate = useNavigate({ from: "/feed" });
+  const { user, isLeader } = useAuth();
+  const qc = useQueryClient();
+
+  const page = s.page ?? 1;
+  const sort = s.sort ?? "newest";
+
+  const q = useQuery({
+    queryKey: ["posts", page, sort],
+    queryFn: () => fetchPostsPaginated(page, 10, sort),
+  });
+
+  const userPins = useQuery({
+    queryKey: ["user-pins", "post", (user as User)?.uid],
+    enabled: !!user,
+    queryFn: () => fetchUserPins((user as User)!.uid, "post"),
+  });
+
+  const pinPost = useMutation({
+    mutationFn: ({ postId, pin }: { postId: string; pin: boolean }) => togglePostPin(postId, (user as User)!.uid, pin),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["posts"] }),
+  });
+
+  const bookmarkPost = useMutation({
+    mutationFn: (postId: string) => toggleUserPin((user as User)!.uid, "post", postId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["user-pins", "post"] }),
+  });
+
+  const setSearch = (patch: Record<string, unknown>) => navigate({ search: { ...s, ...patch } });
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
-      <main className="max-w-3xl mx-auto p-6 lg:p-10">
-        <div className="flex items-end justify-between mb-6">
+      <main className="max-w-2xl mx-auto p-6 lg:p-10">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-6 flex-wrap gap-3">
           <h1 className="text-4xl font-black uppercase tracking-tighter">Community Feed</h1>
-          <Link to="/posts/new" className="px-4 py-2 border-2 border-border bg-primary font-mono text-[11px] font-extrabold uppercase brutal-shadow">
-            + New Post
-          </Link>
+          <div className="flex items-center gap-2">
+            <select
+              value={sort}
+              onChange={(e) => setSearch({ sort: e.target.value, page: 1 })}
+              className="border-2 border-border bg-background px-2 py-1.5 font-mono text-[10px] uppercase"
+            >
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+            </select>
+            <Link to="/posts/new" className="px-4 py-2 border-2 border-border bg-primary font-mono text-[11px] font-extrabold uppercase brutal-shadow">
+              + New Post
+            </Link>
+          </div>
         </div>
-        <div className="space-y-5">
-          {(q.data ?? []).map((p) => (
-            <article key={p.id} className="border-2 border-border bg-card p-6 brutal-shadow">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="size-8 rounded-full bg-primary border-2 border-border grid place-items-center text-[10px] font-black">
-                  {(p.profiles?.display_name ?? "?").slice(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <div className="text-[11px] font-mono font-extrabold uppercase">
-                    {p.profiles?.display_name ?? "Anonymous"}
+
+        {/* Posts */}
+        <div className="space-y-6">
+          {(q.data?.data ?? []).map((p) => {
+            const isPinned = p.is_pinned;
+            const isBookmarked = userPins.data?.has(p.id) ?? false;
+
+            return (
+              <article
+                key={p.id}
+                className={`border-2 border-border bg-card brutal-shadow ${isPinned ? "border-tertiary" : ""}`}
+              >
+                {/* Pinned indicator */}
+                {isPinned && (
+                  <div className="bg-tertiary border-b-2 border-border px-4 py-1.5 text-[10px] font-mono font-extrabold uppercase flex items-center gap-1">
+                    📌 Pinned post
                   </div>
-                  <div className="text-[10px] font-mono text-muted-foreground uppercase">
-                    {new Date(p.created_at).toLocaleString()}
+                )}
+
+                <div className="p-5">
+                  {/* Author row */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-full bg-primary border-2 border-border grid place-items-center text-xs font-black">
+                        {(p.profiles?.display_name ?? "?").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-mono font-extrabold uppercase">
+                          {p.profiles?.display_name ?? "Anonymous"}
+                        </div>
+                        <div className="text-[10px] font-mono text-muted-foreground">
+                          {new Date(p.created_at).toLocaleDateString()} · {new Date(p.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </div>
+                      </div>
+                    </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-1">
+                      {user && (
+                        <button
+                          type="button"
+                          onClick={() => bookmarkPost.mutate(p.id)}
+                          className={`px-2 py-1 border-2 border-border text-[10px] font-mono font-extrabold ${isBookmarked ? "bg-secondary" : "bg-background"}`}
+                          title={isBookmarked ? "Remove bookmark" : "Bookmark"}
+                        >
+                          {isBookmarked ? "🔖" : "📎"}
+                        </button>
+                      )}
+                      {isLeader && (
+                        <button
+                          type="button"
+                          onClick={() => pinPost.mutate({ postId: p.id, pin: !isPinned })}
+                          className={`px-2 py-1 border-2 border-border text-[10px] font-mono font-extrabold ${isPinned ? "bg-tertiary" : "bg-background"}`}
+                          title={isPinned ? "Unpin" : "Pin to top (max 3)"}
+                        >
+                          📌
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {/* Title */}
+                  <h2 className="font-black text-xl uppercase leading-tight mb-3">{p.title}</h2>
+
+                  {/* Body */}
+                  <div
+                    className="prose prose-sm max-w-none [&_p]:my-2 [&_img]:border-2 [&_img]:border-border [&_img]:my-3"
+                    dangerouslySetInnerHTML={{ __html: p.body_html }}
+                  />
+
+                  {/* Comments section */}
+                  <CommentSection postId={p.id} user={user} />
                 </div>
-              </div>
-              <h2 className="font-black text-xl uppercase leading-tight mb-3">{p.title}</h2>
-              <div
-                className="prose prose-sm max-w-none [&_p]:my-2 [&_img]:border-2 [&_img]:border-border [&_img]:my-3"
-                dangerouslySetInnerHTML={{ __html: p.body_html }}
-              />
-            </article>
-          ))}
-          {!q.isLoading && (q.data ?? []).length === 0 && (
+              </article>
+            );
+          })}
+
+          {!q.isLoading && (q.data?.data ?? []).length === 0 && (
             <div className="border-2 border-dashed border-border p-10 text-center text-sm font-mono uppercase">
               Nothing posted yet. Be first.
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        <PaginationControls
+          page={page}
+          pageSize={10}
+          total={q.data?.total ?? 0}
+          onPageChange={(p) => setSearch({ page: p })}
+        />
       </main>
     </div>
   );

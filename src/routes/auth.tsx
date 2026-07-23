@@ -1,8 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteHeader } from "@/components/site-header";
+import { auth } from "@/lib/firebase";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -21,108 +26,121 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/" });
+    // If they are already signed in, redirect them
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) navigate({ to: "/" });
     });
+    return () => unsubscribe();
   }, [navigate]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
     setBusy(true);
-    if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: window.location.origin,
-          data: { display_name: displayName || email.split("@")[0] },
-        },
-      });
-      setBusy(false);
-      if (error) return setErr(error.message);
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      setBusy(false);
-      if (error) return setErr(error.message);
-    }
-    navigate({ to: "/" });
-  }
 
-  async function google() {
-    setErr(null);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.error) return setErr(String(result.error));
-    if (!result.redirected) navigate({ to: "/" });
+    try {
+      if (mode === "signup") {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        const name = displayName || email.split("@")[0];
+        
+        await updateProfile(user, { displayName: name });
+        
+        // Ensure profile exists in Supabase DB (Supabase handles custom JWT inserts if RLS permits)
+        // Wait, for custom JWTs, we must manually create the profile row since there's no trigger.
+        // We set the token so the client is authenticated for the insert.
+        const token = await user.getIdToken();
+        const { setSupabaseToken } = await import("@/integrations/supabase/client");
+        setSupabaseToken(token);
+        
+        await supabase.from("profiles").upsert({
+          id: user.uid,
+          display_name: name,
+        });
+
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+      navigate({ to: "/" });
+    } catch (error: any) {
+      setErr(error.message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       <SiteHeader />
-      <main className="max-w-md mx-auto p-6 lg:p-10">
-        <div className="border-2 border-border bg-card p-6 brutal-shadow">
-          <h1 className="text-3xl font-black uppercase tracking-tighter mb-2">
-            {mode === "signin" ? "Sign in" : "Join Vanguard"}
-          </h1>
-          <p className="text-xs font-mono uppercase text-muted-foreground mb-6">
-            Free follower account · upgrade to Leader anytime
-          </p>
+      <main className="flex-1 grid place-items-center p-6">
+        <div className="w-full max-w-md border-2 border-border bg-card p-6 md:p-10 brutal-shadow">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-black tracking-tighter uppercase mb-2">Vanguard</h1>
+            <p className="font-mono text-[10px] font-extrabold uppercase text-muted-foreground">
+              Identify yourself to continue
+            </p>
+          </div>
 
-          <button
-            type="button"
-            onClick={google}
-            className="w-full py-3 border-2 border-border bg-tertiary font-mono text-[11px] font-extrabold uppercase mb-4 brutal-shadow-sm"
-          >
-            Continue with Google
-          </button>
+          {err && (
+            <div className="mb-6 p-4 border-2 border-border bg-danger text-[11px] font-mono font-extrabold uppercase">
+              {err}
+            </div>
+          )}
 
-          <div className="text-center text-[10px] font-mono uppercase text-muted-foreground my-4">— or —</div>
-
-          <form onSubmit={submit} className="space-y-3">
+          <form onSubmit={submit} className="space-y-4">
             {mode === "signup" && (
-              <input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Display name"
-                maxLength={60}
-                className="w-full border-2 border-border bg-background px-3 py-2 font-bold"
-              />
+              <label className="block">
+                <span className="block text-[11px] font-mono font-extrabold uppercase mb-2">Display Name</span>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="w-full border-2 border-border bg-background px-4 py-3 font-mono text-sm"
+                  placeholder="Anonymous"
+                />
+              </label>
             )}
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              required
-              className="w-full border-2 border-border bg-background px-3 py-2 font-mono"
-            />
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password (8+ chars)"
-              minLength={8}
-              required
-              className="w-full border-2 border-border bg-background px-3 py-2 font-mono"
-            />
-            {err && <div className="border-2 border-border bg-danger p-2 text-xs font-mono">{err}</div>}
+            <label className="block">
+              <span className="block text-[11px] font-mono font-extrabold uppercase mb-2">Email *</span>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full border-2 border-border bg-background px-4 py-3 font-mono text-sm"
+                placeholder="rebel@example.com"
+              />
+            </label>
+            <label className="block">
+              <span className="block text-[11px] font-mono font-extrabold uppercase mb-2">Password *</span>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full border-2 border-border bg-background px-4 py-3 font-mono text-sm"
+                placeholder="••••••••"
+              />
+            </label>
             <button
+              type="submit"
               disabled={busy}
-              className="w-full py-3 border-2 border-border bg-foreground text-background font-mono text-[11px] font-extrabold uppercase disabled:opacity-50"
+              className="w-full py-4 border-2 border-border bg-foreground text-background font-mono text-[11px] font-extrabold uppercase hover:bg-primary transition-colors disabled:opacity-50 mt-4"
             >
-              {busy ? "…" : mode === "signin" ? "Sign in" : "Create account"}
+              {busy ? "Processing..." : mode === "signin" ? "Sign in" : "Join Vanguard"}
             </button>
           </form>
 
-          <button
-            type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="w-full mt-4 text-[11px] font-mono uppercase underline"
-          >
-            {mode === "signin" ? "Need an account? Sign up" : "Have an account? Sign in"}
-          </button>
+          <div className="mt-8 text-center border-t-2 border-border pt-6">
+            <button
+              type="button"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              className="text-[10px] font-mono font-extrabold uppercase hover:underline decoration-2 underline-offset-4"
+            >
+              {mode === "signin" ? "No ID yet? Create one →" : "← Already have an ID? Sign in"}
+            </button>
+          </div>
         </div>
       </main>
     </div>

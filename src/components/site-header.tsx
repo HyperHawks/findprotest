@@ -1,26 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import { auth } from "@/lib/firebase";
+import { useAuth } from "@/hooks/use-auth";
 
 const NAV = [
   { to: "/map", label: "Global Map" },
   { to: "/protests", label: "Protests" },
+  { to: "/parties", label: "Parties" },
   { to: "/news", label: "News" },
   { to: "/feed", label: "Feed" },
   { to: "/pricing", label: "Leader" },
 ] as const;
 
 export function SiteHeader() {
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  const { user } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
@@ -42,6 +36,7 @@ export function SiteHeader() {
           >
             Vanguard
           </Link>
+          {/* Desktop nav */}
           <div className="hidden md:flex gap-6 text-[11px] font-mono font-extrabold uppercase">
             {NAV.map((n) => (
               <Link
@@ -67,7 +62,7 @@ export function SiteHeader() {
               <button
                 type="button"
                 onClick={async () => {
-                  await supabase.auth.signOut();
+                  await auth.signOut();
                   window.location.href = "/";
                 }}
                 className="px-4 py-2 text-[10px] font-mono font-extrabold border-2 border-border bg-foreground text-background uppercase tracking-tighter"
@@ -83,8 +78,43 @@ export function SiteHeader() {
               Sign in
             </Link>
           )}
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden px-2 py-2 border-2 border-border bg-background font-mono text-sm font-extrabold"
+            aria-label="Toggle menu"
+          >
+            {mobileOpen ? "✕" : "☰"}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-b-2 border-border bg-card px-4 py-4 space-y-1 sticky top-16 z-40">
+          {NAV.map((n) => (
+            <Link
+              key={n.to}
+              to={n.to}
+              onClick={() => setMobileOpen(false)}
+              className="block px-4 py-3 text-[11px] font-mono font-extrabold uppercase border-2 border-border bg-background hover:bg-primary transition-colors"
+              activeProps={{ className: "block px-4 py-3 text-[11px] font-mono font-extrabold uppercase border-2 border-border bg-foreground text-background" }}
+            >
+              {n.label}
+            </Link>
+          ))}
+          {user && (
+            <Link
+              to="/posts/new"
+              onClick={() => setMobileOpen(false)}
+              className="block px-4 py-3 text-[11px] font-mono font-extrabold uppercase border-2 border-border bg-tertiary"
+            >
+              + New Post
+            </Link>
+          )}
+        </div>
+      )}
     </>
   );
 }

@@ -8,7 +8,7 @@ import Link from "@tiptap/extension-link";
 import { z } from "zod";
 import { SiteHeader } from "@/components/site-header";
 import { supabase } from "@/integrations/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/posts/new")({
   head: () => ({
@@ -25,17 +25,14 @@ const schema = z.object({
 function NewPost() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [user, setUser] = useState<User | null>(null);
+  const { user, isLoading } = useAuth();
   const [title, setTitle] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-
+  
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) navigate({ to: "/auth" });
-      else setUser(data.session.user);
-    });
-  }, [navigate]);
+    if (!isLoading && !user) navigate({ to: "/auth" });
+  }, [user, isLoading, navigate]);
 
   const editor = useEditor({
     extensions: [StarterKit, Image.configure({ HTMLAttributes: { class: "max-w-full" } }), Link],
@@ -51,7 +48,7 @@ function NewPost() {
   async function uploadImage(file: File) {
     if (!user) return;
     const ext = file.name.split(".").pop() ?? "jpg";
-    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+    const path = `${user.uid}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("post-media").upload(path, file);
     if (error) { setErr(error.message); return; }
     const { data } = supabase.storage.from("post-media").getPublicUrl(path);
@@ -66,7 +63,7 @@ function NewPost() {
     if (!parsed.success) { setErr(parsed.error.issues[0].message); return; }
     setSaving(true);
     const { data, error } = await supabase.from("posts").insert({
-      author_id: user.id,
+      author_id: user.uid,
       title: parsed.data.title,
       body_html: parsed.data.body_html,
     }).select("id").single();

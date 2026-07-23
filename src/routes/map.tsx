@@ -4,9 +4,13 @@ import { z } from "zod";
 
 import { SiteHeader } from "@/components/site-header";
 import { WorldChoropleth, IntensityLegend } from "@/components/world-choropleth";
-import { fetchCountryStats, fetchProtests } from "@/lib/queries";
+import { PaginationControls } from "@/components/pagination-controls";
+import { fetchCountryStats, fetchProtestsPaginated } from "@/lib/queries";
 
-const search = z.object({ country: z.string().length(2).optional() });
+const search = z.object({
+  country: z.string().optional(),
+  page: z.coerce.number().min(1).optional(),
+});
 
 export const Route = createFileRoute("/map")({
   validateSearch: (s) => search.parse(s),
@@ -22,12 +26,14 @@ export const Route = createFileRoute("/map")({
 });
 
 function MapPage() {
-  const { country } = Route.useSearch();
+  const s = Route.useSearch();
   const navigate = useNavigate({ from: "/map" });
   const stats = useQuery({ queryKey: ["country-stats"], queryFn: fetchCountryStats });
+  const page = s.page ?? 1;
+  
   const protests = useQuery({
-    queryKey: ["protests", { country }],
-    queryFn: () => fetchProtests({ country }),
+    queryKey: ["protests-map", s.country, page],
+    queryFn: () => fetchProtestsPaginated({ country: s.country, page, pageSize: 20 }),
   });
 
   return (
@@ -39,12 +45,12 @@ function MapPage() {
             <div>
               <h1 className="text-3xl font-black uppercase tracking-tighter">Global Intensity Map</h1>
               <p className="text-xs font-mono uppercase text-muted-foreground">
-                {country ? `Filtered by ${country}` : "Click a country to filter"}
+                {s.country ? `Zoomed into ${s.country} · Click map to explore` : "Click a country to zoom in"}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <IntensityLegend />
-              {country && (
+              {s.country && (
                 <button
                   type="button"
                   className="px-3 py-2 border-2 border-border bg-danger text-[10px] font-mono font-extrabold uppercase"
@@ -57,16 +63,24 @@ function MapPage() {
           </div>
           <WorldChoropleth
             stats={stats.data ?? []}
-            onCountryClick={(alpha2) => navigate({ search: { country: alpha2 } })}
+            selectedCountry={s.country}
+            protests={protests.data?.data}
+            onCountryClick={(alpha2) => {
+              if (alpha2 && alpha2 !== s.country) {
+                navigate({ search: { country: alpha2, page: 1 } });
+              } else {
+                navigate({ search: {} });
+              }
+            }}
           />
         </section>
         <aside className="lg:col-span-4 p-4 md:p-6 bg-card">
           <h2 className="text-xl font-black uppercase mb-4 flex items-center gap-2">
             <span className="size-2 bg-foreground animate-pulse" />
-            {country ? `Protests in ${country}` : "Latest worldwide"}
+            {s.country ? `Protests in ${s.country}` : "Latest worldwide"}
           </h2>
-          <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
-            {(protests.data ?? []).map((p) => (
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            {(protests.data?.data ?? []).map((p) => (
               <Link
                 key={p.id}
                 to="/protests/$id"
@@ -88,12 +102,18 @@ function MapPage() {
                 </div>
               </Link>
             ))}
-            {!protests.isLoading && (protests.data ?? []).length === 0 && (
+            {!protests.isLoading && (protests.data?.data ?? []).length === 0 && (
               <div className="border-2 border-dashed border-border p-6 text-center text-xs font-mono uppercase">
                 No protests here yet.
               </div>
             )}
           </div>
+          <PaginationControls
+            page={page}
+            pageSize={20}
+            total={protests.data?.total ?? 0}
+            onPageChange={(p) => navigate({ search: { ...s, page: p } })}
+          />
         </aside>
       </main>
     </div>

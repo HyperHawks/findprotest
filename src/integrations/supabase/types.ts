@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_channels: {
+        Row: {
+          id: string
+          entity_type: Database["public"]["Enums"]["entity_type"]
+          entity_id: string
+          name: string
+          slug: string
+          type: Database["public"]["Enums"]["channel_type"]
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          entity_type: Database["public"]["Enums"]["entity_type"]
+          entity_id: string
+          name: string
+          slug: string
+          type?: Database["public"]["Enums"]["channel_type"]
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          entity_type?: Database["public"]["Enums"]["entity_type"]
+          entity_id?: string
+          name?: string
+          slug?: string
+          type?: Database["public"]["Enums"]["channel_type"]
+          created_at?: string
+        }
+        Relationships: []
+      }
+      chat_messages: {
+        Row: {
+          id: string
+          channel_id: string
+          author_id: string
+          body: string
+          is_pinned: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          channel_id: string
+          author_id: string
+          body: string
+          is_pinned?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          channel_id?: string
+          author_id?: string
+          body?: string
+          is_pinned?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "chat_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author_id: string
@@ -21,6 +86,7 @@ export type Database = {
           created_at: string
           id: string
           post_id: string
+          parent_comment_id: string | null
         }
         Insert: {
           author_id: string
@@ -28,6 +94,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id: string
+          parent_comment_id?: string | null
         }
         Update: {
           author_id?: string
@@ -35,6 +102,7 @@ export type Database = {
           created_at?: string
           id?: string
           post_id?: string
+          parent_comment_id?: string | null
         }
         Relationships: [
           {
@@ -206,6 +274,83 @@ export type Database = {
           },
         ]
       }
+      party_members: {
+        Row: {
+          party_id: string
+          user_id: string
+          role: Database["public"]["Enums"]["party_member_role"]
+          created_at: string
+        }
+        Insert: {
+          party_id: string
+          user_id: string
+          role?: Database["public"]["Enums"]["party_member_role"]
+          created_at?: string
+        }
+        Update: {
+          party_id?: string
+          user_id?: string
+          role?: Database["public"]["Enums"]["party_member_role"]
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_members_party_id_fkey"
+            columns: ["party_id"]
+            isOneToOne: false
+            referencedRelation: "political_parties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      political_parties: {
+        Row: {
+          id: string
+          leader_id: string
+          name: string
+          slug: string
+          description_html: string
+          logo_url: string | null
+          ideology: string | null
+          founding_date: string | null
+          country_code: string | null
+          website: string | null
+          supporter_count_cached: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          leader_id: string
+          name: string
+          slug: string
+          description_html?: string
+          logo_url?: string | null
+          ideology?: string | null
+          founding_date?: string | null
+          country_code?: string | null
+          website?: string | null
+          supporter_count_cached?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          leader_id?: string
+          name?: string
+          slug?: string
+          description_html?: string
+          logo_url?: string | null
+          ideology?: string | null
+          founding_date?: string | null
+          country_code?: string | null
+          website?: string | null
+          supporter_count_cached?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           author_id: string
@@ -216,6 +361,8 @@ export type Database = {
           protest_id: string | null
           title: string
           updated_at: string
+          is_pinned: boolean
+          pinned_by: string | null
         }
         Insert: {
           author_id: string
@@ -226,6 +373,8 @@ export type Database = {
           protest_id?: string | null
           title: string
           updated_at?: string
+          is_pinned?: boolean
+          pinned_by?: string | null
         }
         Update: {
           author_id?: string
@@ -236,6 +385,8 @@ export type Database = {
           protest_id?: string | null
           title?: string
           updated_at?: string
+          is_pinned?: boolean
+          pinned_by?: string | null
         }
         Relationships: [
           {
@@ -327,6 +478,16 @@ export type Database = {
           title: string
           updated_at: string
           verified: boolean
+          is_peaceful: boolean
+          motto: string | null
+          how_to_join: string | null
+          what_to_bring: string[]
+          services_available: string[]
+          plan_of_action_html: string | null
+          milestones: unknown
+          arrival_info: string | null
+          rating: number | null
+          personalities: string[]
         }
         Insert: {
           cause_tags?: string[]
@@ -348,6 +509,16 @@ export type Database = {
           title: string
           updated_at?: string
           verified?: boolean
+          is_peaceful?: boolean
+          motto?: string | null
+          how_to_join?: string | null
+          what_to_bring?: string[]
+          services_available?: string[]
+          plan_of_action_html?: string | null
+          milestones?: unknown
+          arrival_info?: string | null
+          rating?: number | null
+          personalities?: string[]
         }
         Update: {
           cause_tags?: string[]
@@ -369,6 +540,37 @@ export type Database = {
           title?: string
           updated_at?: string
           verified?: boolean
+          is_peaceful?: boolean
+          motto?: string | null
+          how_to_join?: string | null
+          what_to_bring?: string[]
+          services_available?: string[]
+          plan_of_action_html?: string | null
+          milestones?: unknown
+          arrival_info?: string | null
+          rating?: number | null
+          personalities?: string[]
+        }
+        Relationships: []
+      }
+      user_pins: {
+        Row: {
+          user_id: string
+          entity_type: string
+          entity_id: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          entity_type: string
+          entity_id: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          entity_type?: string
+          entity_id?: string
+          created_at?: string
         }
         Relationships: []
       }
@@ -417,6 +619,9 @@ export type Database = {
     Enums: {
       app_role: "follower" | "leader" | "admin"
       attendance_status: "interested" | "going"
+      channel_type: "announcements" | "general"
+      entity_type: "protest" | "party"
+      party_member_role: "supporter" | "admin"
       protest_status: "upcoming" | "active" | "ended" | "cancelled"
       subscription_status:
         | "inactive"
@@ -553,6 +758,9 @@ export const Constants = {
     Enums: {
       app_role: ["follower", "leader", "admin"],
       attendance_status: ["interested", "going"],
+      channel_type: ["announcements", "general"],
+      entity_type: ["protest", "party"],
+      party_member_role: ["supporter", "admin"],
       protest_status: ["upcoming", "active", "ended", "cancelled"],
       subscription_status: [
         "inactive",

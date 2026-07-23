@@ -9,34 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as NewsRouteImport } from './routes/news'
-import { Route as MapRouteImport } from './routes/map'
-import { Route as FeedRouteImport } from './routes/feed'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as MapRouteImport } from './routes/map'
+import { Route as NewsRouteImport } from './routes/news'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PartiesIndexRouteImport } from './routes/parties.index'
+import { Route as PartiesIdRouteImport } from './routes/parties.$id'
+import { Route as PartiesNewRouteImport } from './routes/parties.new'
+import { Route as PostsNewRouteImport } from './routes/posts.new'
 import { Route as ProtestsIndexRouteImport } from './routes/protests.index'
 import { Route as ProtestsIdRouteImport } from './routes/protests.$id'
-import { Route as PostsNewRouteImport } from './routes/posts.new'
 
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsRoute = NewsRouteImport.update({
-  id: '/news',
-  path: '/news',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MapRoute = MapRouteImport.update({
-  id: '/map',
-  path: '/map',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FeedRoute = FeedRouteImport.update({
-  id: '/feed',
-  path: '/feed',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -44,9 +32,44 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartiesIndexRoute = PartiesIndexRouteImport.update({
+  id: '/parties/',
+  path: '/parties/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartiesIdRoute = PartiesIdRouteImport.update({
+  id: '/parties/$id',
+  path: '/parties/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartiesNewRoute = PartiesNewRouteImport.update({
+  id: '/parties/new',
+  path: '/parties/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsNewRoute = PostsNewRouteImport.update({
+  id: '/posts/new',
+  path: '/posts/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtestsIndexRoute = ProtestsIndexRouteImport.update({
@@ -59,11 +82,6 @@ const ProtestsIdRoute = ProtestsIdRouteImport.update({
   path: '/protests/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PostsNewRoute = PostsNewRouteImport.update({
-  id: '/posts/new',
-  path: '/posts/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -72,8 +90,11 @@ export interface FileRoutesByFullPath {
   '/map': typeof MapRoute
   '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
+  '/parties/$id': typeof PartiesIdRoute
+  '/parties/new': typeof PartiesNewRoute
   '/posts/new': typeof PostsNewRoute
   '/protests/$id': typeof ProtestsIdRoute
+  '/parties/': typeof PartiesIndexRoute
   '/protests/': typeof ProtestsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -83,8 +104,11 @@ export interface FileRoutesByTo {
   '/map': typeof MapRoute
   '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
+  '/parties/$id': typeof PartiesIdRoute
+  '/parties/new': typeof PartiesNewRoute
   '/posts/new': typeof PostsNewRoute
   '/protests/$id': typeof ProtestsIdRoute
+  '/parties': typeof PartiesIndexRoute
   '/protests': typeof ProtestsIndexRoute
 }
 export interface FileRoutesById {
@@ -95,8 +119,11 @@ export interface FileRoutesById {
   '/map': typeof MapRoute
   '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
+  '/parties/$id': typeof PartiesIdRoute
+  '/parties/new': typeof PartiesNewRoute
   '/posts/new': typeof PostsNewRoute
   '/protests/$id': typeof ProtestsIdRoute
+  '/parties/': typeof PartiesIndexRoute
   '/protests/': typeof ProtestsIndexRoute
 }
 export interface FileRouteTypes {
@@ -108,8 +135,11 @@ export interface FileRouteTypes {
     | '/map'
     | '/news'
     | '/pricing'
+    | '/parties/$id'
+    | '/parties/new'
     | '/posts/new'
     | '/protests/$id'
+    | '/parties/'
     | '/protests/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -119,8 +149,11 @@ export interface FileRouteTypes {
     | '/map'
     | '/news'
     | '/pricing'
+    | '/parties/$id'
+    | '/parties/new'
     | '/posts/new'
     | '/protests/$id'
+    | '/parties'
     | '/protests'
   id:
     | '__root__'
@@ -130,8 +163,11 @@ export interface FileRouteTypes {
     | '/map'
     | '/news'
     | '/pricing'
+    | '/parties/$id'
+    | '/parties/new'
     | '/posts/new'
     | '/protests/$id'
+    | '/parties/'
     | '/protests/'
   fileRoutesById: FileRoutesById
 }
@@ -142,39 +178,21 @@ export interface RootRouteChildren {
   MapRoute: typeof MapRoute
   NewsRoute: typeof NewsRoute
   PricingRoute: typeof PricingRoute
+  PartiesIdRoute: typeof PartiesIdRoute
+  PartiesNewRoute: typeof PartiesNewRoute
   PostsNewRoute: typeof PostsNewRoute
   ProtestsIdRoute: typeof ProtestsIdRoute
+  PartiesIndexRoute: typeof PartiesIndexRoute
   ProtestsIndexRoute: typeof ProtestsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news': {
-      id: '/news'
-      path: '/news'
-      fullPath: '/news'
-      preLoaderRoute: typeof NewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/map': {
-      id: '/map'
-      path: '/map'
-      fullPath: '/map'
-      preLoaderRoute: typeof MapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/feed': {
-      id: '/feed'
-      path: '/feed'
-      fullPath: '/feed'
-      preLoaderRoute: typeof FeedRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -184,11 +202,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parties/': {
+      id: '/parties/'
+      path: '/parties'
+      fullPath: '/parties/'
+      preLoaderRoute: typeof PartiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parties/$id': {
+      id: '/parties/$id'
+      path: '/parties/$id'
+      fullPath: '/parties/$id'
+      preLoaderRoute: typeof PartiesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parties/new': {
+      id: '/parties/new'
+      path: '/parties/new'
+      fullPath: '/parties/new'
+      preLoaderRoute: typeof PartiesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/new': {
+      id: '/posts/new'
+      path: '/posts/new'
+      fullPath: '/posts/new'
+      preLoaderRoute: typeof PostsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/protests/': {
@@ -205,13 +272,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtestsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/posts/new': {
-      id: '/posts/new'
-      path: '/posts/new'
-      fullPath: '/posts/new'
-      preLoaderRoute: typeof PostsNewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -222,10 +282,23 @@ const rootRouteChildren: RootRouteChildren = {
   MapRoute: MapRoute,
   NewsRoute: NewsRoute,
   PricingRoute: PricingRoute,
+  PartiesIdRoute: PartiesIdRoute,
+  PartiesNewRoute: PartiesNewRoute,
   PostsNewRoute: PostsNewRoute,
   ProtestsIdRoute: ProtestsIdRoute,
+  PartiesIndexRoute: PartiesIndexRoute,
   ProtestsIndexRoute: ProtestsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
