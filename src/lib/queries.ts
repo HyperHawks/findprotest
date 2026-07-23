@@ -46,13 +46,29 @@ export async function fetchNews(filters: { country?: string; cause?: string } = 
 }
 
 export async function fetchPosts(): Promise<(Post & { profiles: { display_name: string | null; avatar_url: string | null } | null })[]> {
-  const { data, error } = await supabase
+  const { data: posts, error: postsError } = await supabase
     .from("posts")
-    .select("*, profiles!posts_author_id_fkey(display_name, avatar_url)")
+    .select("*")
     .order("created_at", { ascending: false })
     .limit(50);
-  if (error) throw error;
-  return (data ?? []) as never;
+    
+  if (postsError) throw postsError;
+  if (!posts || posts.length === 0) return [];
+
+  const authorIds = Array.from(new Set(posts.map((p) => p.author_id)));
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id, display_name, avatar_url")
+    .in("id", authorIds);
+    
+  if (profilesError) throw profilesError;
+
+  const profileMap = new Map(profiles?.map((p) => [p.id, p]));
+
+  return posts.map((p) => ({
+    ...p,
+    profiles: profileMap.get(p.author_id) ?? null,
+  })) as never;
 }
 
 export async function fetchAttendeeCount(protestId: string): Promise<number> {

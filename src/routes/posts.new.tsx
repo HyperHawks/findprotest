@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
@@ -23,6 +24,7 @@ const schema = z.object({
 
 function NewPost() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
   const [title, setTitle] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -70,6 +72,7 @@ function NewPost() {
     }).select("id").single();
     setSaving(false);
     if (error) { setErr(error.message); return; }
+    await queryClient.invalidateQueries({ queryKey: ["posts"] });
     navigate({ to: "/feed" });
   }
 
