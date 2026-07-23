@@ -25,6 +25,39 @@ export function WorldChoropleth({
   }, []);
 
   const byAlpha2 = new Map(stats.map((s) => [s.country_code.toUpperCase(), s]));
+  const indiaBucket = byAlpha2.get("IN")?.color_bucket ?? 0;
+
+  // Overlay polygons so the map reflects India's officially claimed borders
+  // (PoK / Gilgit-Baltistan and Aksai Chin rendered as part of India).
+  const indiaClaimed = {
+    type: "FeatureCollection" as const,
+    features: [
+      {
+        type: "Feature" as const,
+        id: "IN-POK",
+        properties: { name: "PoK (claimed by India)" },
+        geometry: {
+          type: "Polygon" as const,
+          coordinates: [[
+            [73.0, 37.1], [74.5, 37.1], [76.8, 36.0], [77.2, 34.6],
+            [76.0, 33.2], [74.2, 32.5], [73.3, 33.5], [73.0, 34.8], [73.0, 37.1],
+          ]],
+        },
+      },
+      {
+        type: "Feature" as const,
+        id: "IN-AKSAI",
+        properties: { name: "Aksai Chin (claimed by India)" },
+        geometry: {
+          type: "Polygon" as const,
+          coordinates: [[
+            [78.0, 35.5], [80.3, 35.4], [80.6, 34.3], [79.5, 33.6],
+            [78.2, 33.9], [77.9, 34.8], [78.0, 35.5],
+          ]],
+        },
+      },
+    ],
+  };
 
   return (
     <div className="w-full aspect-[2/1] bg-background border-2 border-border">
@@ -65,6 +98,34 @@ export function WorldChoropleth({
                 />
               );
             })
+          }
+        </Geographies>
+        {/* Overlay: render PoK and Aksai Chin as part of India (India's claimed borders). */}
+        <Geographies geography={indiaClaimed}>
+          {({ geographies }) =>
+            geographies.map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                onClick={() => onCountryClick?.("IN")}
+                style={{
+                  default: {
+                    fill: PROTEST_FILL[indiaBucket],
+                    stroke: "#000",
+                    strokeWidth: 0.4,
+                    outline: "none",
+                    cursor: "pointer",
+                  },
+                  hover: {
+                    fill: PROTEST_FILL[Math.min(5, indiaBucket + 1)],
+                    stroke: "#000",
+                    strokeWidth: 1,
+                    outline: "none",
+                  },
+                  pressed: { fill: PROTEST_FILL[5], outline: "none" },
+                }}
+              />
+            ))
           }
         </Geographies>
       </ComposableMap>
